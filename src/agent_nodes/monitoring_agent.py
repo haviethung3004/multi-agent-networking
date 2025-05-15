@@ -23,18 +23,21 @@ promt_template = PromptTemplate(
     input_variables=["messages"],
     )
 
-agent = create_react_agent(
-    model=llm,
-    tools=[get_device_info, generate_report],
-    name="monitoring_agent",
-    prompt=promt_template,
-    )
+def monitoring_agent():
+    # Create the agent
+    monitoring_agent = create_react_agent(
+        model=llm,
+        tools=[get_device_info, generate_report],
+        name="monitoring_agent",
+        prompt=promt_template,
+        )
+    return monitoring_agent
 
 if __name__ == "__main__":
     while True:
         user_input = input("Ask to AI Agent the question or 'exit' to quit: ")
         inputs = {"messages": [{"role": "user", "content": user_input}]}
-        for s in agent.stream(inputs, stream_mode="values"):
+        for s in monitoring_agent.stream(inputs, stream_mode="values"):
             message = s["messages"][-1]
             if isinstance(message, tuple):
                 print(message)

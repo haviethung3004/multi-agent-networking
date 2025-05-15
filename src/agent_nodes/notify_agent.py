@@ -1,3 +1,5 @@
+# src/agent_nodes/notify_agent.py
+
 from langgraph.prebuilt import create_react_agent
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -20,20 +22,23 @@ prompt_template = PromptTemplate(
     template=prompt,
 )
 
-# Create the agent
-agent = create_react_agent(
-    model=llm,
-    tools=[notify_telegram],
-    prompt=prompt_template,
-    name="Notify Agent",
-)
+def notify_agent():
+    # Create the agent
+    notify_agent = create_react_agent(
+        model=llm,
+        tools=[notify_telegram],
+        prompt=prompt_template,
+        name="agent_notify",
+    )
+
+    return notify_agent
 
 if __name__ == "__main__":
     # Example messages to notify
     while True:
         user_input = input("Ask to AI Agent the question or 'exit' to quit: ")
         inputs = {"messages": [{"role": "user", "content": user_input}]}
-        for s in agent.stream(inputs, stream_mode="values"):
+        for s in agent_notify.stream(inputs, stream_mode="values"):
             message = s["messages"][-1]
             if isinstance(message, tuple):
                 print(message)
