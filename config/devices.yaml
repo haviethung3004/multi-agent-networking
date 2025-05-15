@@ -1,9 +1,13 @@
 devices:
-  - name: "mock_router_lab_01"
+  - name: "devices_01"
     ip: "10.0.1.1"
+    status: "up"
     # community_string: "public_lab_snmp" # For when you implement SNMP
-  - name: "mock_switch_core_01"
+  - name: "devices_02"
     ip: "10.0.0.1"
+    status: "up"
     # community_string: "public_lab_snmp"
-  - name: "unreachable_device_01"
-    ip: "192.168.254.254" # To test error handling
+  - name: "device_03"
+    ip: "192.168.254.254"
+    status: "down" 
+    # To test error handling
