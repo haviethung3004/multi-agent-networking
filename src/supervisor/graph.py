@@ -3,7 +3,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph_supervisor import create_supervisor
 from langgraph.checkpoint.memory import MemorySaver
-from agent_nodes.notify_agent import agent_notify
+from agent_nodes.notify_agent import notify_agent
 from agent_nodes.monitoring_agent import monitoring_agent
 from langchain.prompts import ChatPromptTemplate
 
@@ -17,7 +17,7 @@ load_dotenv(find_dotenv(), override=True)
 llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.0-flash-lite")
 
 monitoring_agent_instance = monitoring_agent()
-notify_agent_instance = agent_notify()
+notify_agent_instance = notify_agent()
 
 graph = create_supervisor(
     [monitoring_agent_instance, notify_agent_instance],
