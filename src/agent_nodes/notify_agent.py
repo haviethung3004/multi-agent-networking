@@ -28,7 +28,7 @@ def notify_agent():
         model=llm,
         tools=[notify_telegram],
         prompt=prompt_template,
-        name="agent_notify",
+        name="notify_agent",
     )
 
     return notify_agent
