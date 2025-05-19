@@ -2,7 +2,7 @@
 import os
 import asyncio
 from langchain_core.tools import tool
-import telegram # From python-telegram-bot library
+import telegram
 from dotenv import load_dotenv, find_dotenv
 
 # Load .env if running this file directly for testing
@@ -53,6 +53,7 @@ def notify_telegram(message_text: str) -> str:
             return f"Tool Error (Runtime): {e}"
     except Exception as e:
         return f"Tool Error (notify_telegram wrapper): {type(e).__name__} - {e}"
+
 
 if __name__ == '__main__':
     # Load .env for direct testing of this file

@@ -38,7 +38,7 @@ if __name__ == "__main__":
     while True:
         user_input = input("Ask to AI Agent the question or 'exit' to quit: ")
         inputs = {"messages": [{"role": "user", "content": user_input}]}
-        for s in agent_notify.stream(inputs, stream_mode="values"):
+        for s in notify_agent.stream(inputs, stream_mode="values"):
             message = s["messages"][-1]
             if isinstance(message, tuple):
                 print(message)
