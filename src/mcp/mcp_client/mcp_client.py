@@ -4,6 +4,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langchain_mcp_adapters.resources import load_mcp_resources
+from langchain_mcp_adapters.prompts import load_mcp_prompt
 from langgraph.prebuilt import create_react_agent
 import os
 import asyncio
@@ -38,10 +39,10 @@ async def main():
                     stream_mode="updates"):
                     # Print the event
                     print(event)
-                return event
+                return agent
             except Exception as e:
                 print(f"Error: {e}")
                 return None
-            
+
 if __name__ == "__main__":
     asyncio.run(main())

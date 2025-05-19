@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "graph": "./src/supervisor/graph.py:app"
+    "graph": "./src/mcp/mcp_client/mcp_client.py.py:main"
   },
   "env": "./.env"
 }
