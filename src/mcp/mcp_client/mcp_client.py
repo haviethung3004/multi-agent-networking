@@ -42,7 +42,7 @@ async def main():
                 return agent
             except Exception as e:
                 print(f"Error: {e}")
-                return None
+                return agent
 
 if __name__ == "__main__":
     asyncio.run(main())

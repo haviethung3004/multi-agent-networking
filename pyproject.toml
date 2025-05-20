@@ -2,12 +2,12 @@
 name = "multi-agent-networking"
 version = "0.1.0"
 description = "Add your description here"
-readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "langchain>=0.3.25",
     "langchain-google-genai>=2.1.4",
     "langchain-mcp-adapters>=0.1.0",
+    "langgraph>=0.4.5",
     "langgraph-supervisor>=0.0.21",
     "mcp>=1.9.0",
     "pyats-contrib>=25.4",

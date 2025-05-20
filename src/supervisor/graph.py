@@ -34,4 +34,4 @@ graph = create_supervisor(
     output_mode="full_history"
     )
 
-app = graph.compile(checkpointer=checkpoint, store=store)
+app = graph.compile()
