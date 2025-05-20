@@ -97,10 +97,6 @@ def get_name_devices_tool(testbed_file: str) -> list:
 @mcp.tool()
 def cpu_checking(testbed_file: str, device_name: str):
     """
-    Check CPU usage on a specified device using pyATS.
-    This function connects to the device, executes a command to check CPU usage
-    please use get_testbed_file tool to get the testbed file path and get_name_devices_tool to get the name of the devices.
-
     Args:
         device_name (str): Name of the device in the testbed (e.g., 'R1').
         testbed_file (str, optional): Path to testbed.yaml. If None, uses testbed_file().
@@ -129,4 +125,11 @@ def cpu_checking(testbed_file: str, device_name: str):
 
 
 if __name__ == "__main__":
+    #Test the tool
+    # file_path = testbed_file()
+    # print(f"Testbed file path: {file_path}")
+
+    # device_names = get_name_devices(file_path)
+    # print(device_names)
+
     mcp.run(transport='stdio')
