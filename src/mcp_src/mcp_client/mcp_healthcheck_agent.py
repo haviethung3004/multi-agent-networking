@@ -37,13 +37,18 @@ prompt = """
         - Recommended actions or troubleshooting steps.
     6. Structure your final output in a clear, organized, and easy-to-understand format. Use Markdown for formatting if possible.
 
-    Begin by identifying the device(s) you need to check. Then, proceed with the health assessment using the available tools.
+    Here is the instruction of using the tools:
+    1. Always using the tool get_name_devices to get the name of the devices firstly.
+       You can use get_name_devices without any parameters. Testbed file is already set. Don't ask for it
+       Following and ask user which function they want to check.
+    2. If user ask for specific checking, please use the appropriate tool.
+    3. Custom tool can be used if for any specific command.
 
     Questions to ask:
-    {message}
+    {messages}
 """
 
-prompt_template = PromptTemplate(template=prompt, input_variables=["message"])
+prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
 
 server_params = StdioServerParameters(

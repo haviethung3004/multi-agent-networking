@@ -67,7 +67,7 @@ def get_prompt() -> str:
     """
 
 @mcp.tool()
-def get_name_devices_tool(testbed_file: str) -> list:
+def get_name_devices_tool(testbed_file = testbed_file) -> list:
     """
     Read the content of the testbed file and get the name file.
     A tool that provides a list name of the devices in the testbed file.
@@ -165,19 +165,19 @@ def custom_show_command(device_name: str, command: list[str]) -> str:
 
 if __name__ == "__main__":
     #Test the tool
-    name_device = get_name_devices_tool(testbed_file)
-    print(name_device)
+    # name_device = get_name_devices_tool(testbed_file)
+    # print(name_device)
 
+    # # cpu_checking(name_device[0])
     # cpu_checking(name_device[0])
-    cpu_checking(name_device[0])
 
+    # # interface_checking(name_device[0])
     # interface_checking(name_device[0])
-    interface_checking(name_device[0])
 
+    # # crc_checking(name_device[0])
     # crc_checking(name_device[0])
-    crc_checking(name_device[0])
 
+    # # custom_show_command(name_device[0], "show ip interface brief")
     # custom_show_command(name_device[0], "show ip interface brief")
-    custom_show_command(name_device[0], "show ip interface brief")
 
-    #mcp.run(transport='stdio')
+    mcp.run(transport='stdio')
