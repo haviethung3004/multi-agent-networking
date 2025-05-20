@@ -49,11 +49,11 @@ prompt_template = PromptTemplate(template=prompt, input_variables=["message"])
 server_params = StdioServerParameters(
     command="/home/dsu979/.local/bin/uv",
     #Make sure to use the correct path to your uv command
-    args=["run", "src/mcp/mcp_server/mcp_pyats.py"]
+    args=["run", "/home/dsu979/multi-agent-networking/src/mcp_src/mcp_server/mcp_healthcheck.py"]
 )
 
 @asynccontextmanager
-async def main():
+async def healcheck_agent():
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the connection
