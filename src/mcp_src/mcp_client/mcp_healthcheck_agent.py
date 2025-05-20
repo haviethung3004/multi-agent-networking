@@ -38,9 +38,8 @@ prompt = """
     6. Structure your final output in a clear, organized, and easy-to-understand format. Use Markdown for formatting if possible.
 
     Here is the instruction of using the tools:
-    1. Always using the tool get_name_devices to get the name of the devices firstly.
+    1. Always using the tool get_name_devices to get the name of the devices firstly if user doesn't provide the name of the device.
        You can use get_name_devices without any parameters. Testbed file is already set. Don't ask for it
-       Following and ask user which function they want to check.
     2. If user ask for specific checking, please use the appropriate tool.
     3. Custom tool can be used if for any specific command.
 

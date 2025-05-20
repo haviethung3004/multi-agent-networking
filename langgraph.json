@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "graph": "./src/mcp_src/mcp_client/mcp_healthcheck_agent.py:healcheck_agent"
+    "graph": "./src/supervisor/graph.py:setup_supervisor_graph"
   },
   "env": "./.env"
 }
