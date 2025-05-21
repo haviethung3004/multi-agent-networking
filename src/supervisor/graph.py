@@ -42,8 +42,9 @@ async def setup_supervisor_graph():
     Returns the compiled supervisor application.
     """
     async with mcp_healcheck_agent() as actual_mcp_healthcheck_agent:
+        async with mcp_notify_agent() as actual_mcp_notify_agent:
             supervisor_definition = create_supervisor(
-                agents=[actual_mcp_healthcheck_agent], # Correctly passing the resolved agent
+                agents=[actual_mcp_healthcheck_agent, actual_mcp_notify_agent], # Correctly passing the resolved agent
                 model=llm,
                 prompt=prompt_template,
                 output_mode="full_history"
