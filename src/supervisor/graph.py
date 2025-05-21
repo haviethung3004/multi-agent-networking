@@ -35,20 +35,21 @@ llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-
 
 
 @asynccontextmanager
-async def supervisor_graph():
+async def setup_supervisor_graph():
     """
     Asynchronously initializes the healthcheck agent and creates/compiles the supervisor graph
     using your specific `create_supervisor`.
     Returns the compiled supervisor application.
     """
     async with mcp_healcheck_agent() as actual_mcp_healthcheck_agent:
-        async with mcp_notify_agent() as actual_mcp_notify_agent:
-            # Using YOUR `create_supervisor` from `langgraph_supervisor`
             supervisor_definition = create_supervisor(
-                agents=[actual_mcp_healthcheck_agent, actual_mcp_healthcheck_agent], # Correctly passing the resolved agent
+                agents=[actual_mcp_healthcheck_agent], # Correctly passing the resolved agent
                 model=llm,
                 prompt=prompt_template,
                 output_mode="full_history"
             )
             app = supervisor_definition.compile()
             yield app
+
+if __name__ == "__main__":
+        pass
