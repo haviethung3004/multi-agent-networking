@@ -57,7 +57,7 @@ server_params = StdioServerParameters(
 )
 
 @asynccontextmanager
-async def healcheck_agent():
+async def mcp_healcheck_agent():
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the connection
