@@ -33,7 +33,7 @@ async def mcp_notify_agent():
             agent = create_react_agent(
                 tools=tools,
                 model=llm,
-                name="Notify Agent",
+                name="notify-agent",
                 prompt="You are a Notify Agent. Your job is to send the message to the user via MCP Notify Agent."
             )
 
