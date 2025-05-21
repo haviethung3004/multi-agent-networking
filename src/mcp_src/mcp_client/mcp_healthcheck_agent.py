@@ -75,7 +75,7 @@ async def healcheck_agent():
 
             # Create the agent
             llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model = "gemini-2.0-flash-lite")
-            agent = create_react_agent(model=llm, tools=tools, name="Health Check Agent", prompt=prompt_template)
+            agent = create_react_agent(model=llm, tools=tools, name="healthcheck agent", prompt=prompt_template)
             yield agent
             
 if __name__ == "__main__":
