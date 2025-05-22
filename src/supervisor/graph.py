@@ -6,6 +6,7 @@ from langgraph.store.memory import InMemoryStore
 from mcp_src.mcp_client.mcp_healthcheck_agent import mcp_healcheck_agent
 from contextlib import asynccontextmanager
 from mcp_src.mcp_client.mcp_notify_agent import mcp_notify_agent
+from mcp_src.mcp_client.mcp_ios_cisco_agent import mcp_ios_agent
 from langchain.prompts import PromptTemplate
 
 
@@ -20,7 +21,8 @@ prompt = """
     3. Task Delegation: Assign subtasks to the selected agents, ensuring clear communication and expectations.
     4. Result Synthesis: Collect and integrate the results from all agents, ensuring consistency and coherence.
     5. Transparency and Reporting: Provide the user with a clear overview of the task progress, including any challenges faced and how they were resolved.
-    6. Sending the final result to the via MCP Notify Agent with the structure of content
+    6. Change or check configuration: If the task involves network configuration or checking, use the IOS agent to perform these tasks.
+    7. Sending the final result to the via MCP Notify Agent with the structure of content
     Questions from the user:
     {messages}
     """
@@ -41,9 +43,9 @@ async def setup_supervisor_graph():
     using your specific `create_supervisor`.
     Returns the compiled supervisor application.
     """
-    async with mcp_healcheck_agent() as actual_mcp_healthcheck_agent, mcp_notify_agent() as actual_mcp_notify_agent:
+    async with mcp_healcheck_agent() as actual_mcp_healthcheck_agent, mcp_notify_agent() as actual_mcp_notify_agent, mcp_ios_agent() as actual_mcp_ios_agent:
         supervisor_definition = create_supervisor(
-            agents=[actual_mcp_healthcheck_agent, actual_mcp_notify_agent], # Correctly passing the resolved agent
+            agents=[actual_mcp_healthcheck_agent, actual_mcp_notify_agent, actual_mcp_ios_agent], # Correctly passing the resolved agent
             model=llm,
             prompt=prompt_template,
             output_mode="full_history"
