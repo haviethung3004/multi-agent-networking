@@ -17,8 +17,7 @@ load_dotenv(find_dotenv(), override=True)
 
 prompt = """
     Your task is to send a message to the user by telegram.
-    You can use tool to do it
-    
+    Remember that you must use tool a time and wait for the answer.
     Question:
 
     {messages}
@@ -47,9 +46,11 @@ async def mcp_notify_agent():
             # Create the agent with the tools
             agent = create_react_agent(
                 tools=tools,
+                interrupt_after=["tools"],
                 model=llm,
                 name="notify-agent",
-                prompt=prompt_template
+                prompt=prompt_template,
+                
             )
             yield agent
 
