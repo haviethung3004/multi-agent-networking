@@ -22,8 +22,10 @@ prompt = """
     4. Result Synthesis: Collect and integrate the results from all agents, ensuring consistency and coherence.
     5. Transparency and Reporting: Provide the user with a clear overview of the task progress, including any challenges faced and how they were resolved.
     6. Change or check configuration: If the task involves network configuration or checking, use the IOS agent to perform these tasks.
+       IOS-agent will know the username and password for the devices.
     7. Sending the final result to the via MCP Notify Agent with the structure of content
     Questions from the user:
+    
     {messages}
     """
 
