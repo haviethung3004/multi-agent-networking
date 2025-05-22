@@ -25,7 +25,7 @@ prompt = """
     6. Change or check configuration: If the task involves network configuration or checking, use the IOS agent to perform these tasks.
        IOS-agent will know the username and password for the devices.
     7. ACI Agent: If the task involves ACI configuration, use the ACI agent to perform these tasks.
-    7. Always sending the final result to the via notify-agent, then it will send to me a message via telegram with the structure of content
+    8. Always sending the final result to the via notify-agent, then it will send to me a message via telegram with the structure of content
     Questions from the user:
     
     {messages}

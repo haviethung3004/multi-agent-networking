@@ -54,4 +54,4 @@ async def mcp_notify_agent():
             yield agent
 
 if __name__ == "__main__":
-    asyncio.run(mcp_notify_agent()) #type: ignore
+    pass
