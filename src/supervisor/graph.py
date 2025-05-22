@@ -7,11 +7,12 @@ from mcp_src.mcp_client.mcp_healthcheck_agent import mcp_healcheck_agent
 from contextlib import asynccontextmanager
 from mcp_src.mcp_client.mcp_notify_agent import mcp_notify_agent
 from mcp_src.mcp_client.mcp_ios_cisco_agent import mcp_ios_agent
+from mcp_src.mcp_client.mcp_aci_cisco_agent import mcp_aci_agent
 from langchain.prompts import PromptTemplate
 
 
 prompt = """
-    You are a highly experienced CCIE (Cisco Certified Internetwork Expert) specializing in network health diagnostics and a supervisor managing a network team.
+    You are a highly experienced CCIE (Cisco Certified Internetwork Expert) specializing managing a network team.
     You are a Supervisor Agent in a multi-agent system designed to coordinate a team of specialized agents, some of which operate over a networked environment, 
     to complete complex tasks efficiently. Your role is to interpret user requests, decompose them into subtasks, 
     delegate tasks to appropriate agents (including those handling networking-related functions), 
@@ -23,7 +24,8 @@ prompt = """
     5. Transparency and Reporting: Provide the user with a clear overview of the task progress, including any challenges faced and how they were resolved.
     6. Change or check configuration: If the task involves network configuration or checking, use the IOS agent to perform these tasks.
        IOS-agent will know the username and password for the devices.
-    7. Sending the final result to the via MCP Notify Agent with the structure of content
+    7. ACI Agent: If the task involves ACI configuration, use the ACI agent to perform these tasks.
+    7. Always sending the final result to the via notify-agent, then it will send to me a message via telegram with the structure of content
     Questions from the user:
     
     {messages}
@@ -45,9 +47,9 @@ async def setup_supervisor_graph():
     using your specific `create_supervisor`.
     Returns the compiled supervisor application.
     """
-    async with mcp_healcheck_agent() as actual_mcp_healthcheck_agent, mcp_notify_agent() as actual_mcp_notify_agent, mcp_ios_agent() as actual_mcp_ios_agent:
+    async with mcp_notify_agent() as actual_mcp_notify_agent, mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent:
         supervisor_definition = create_supervisor(
-            agents=[actual_mcp_healthcheck_agent, actual_mcp_notify_agent, actual_mcp_ios_agent], # Correctly passing the resolved agent
+            agents=[actual_mcp_notify_agent, actual_mcp_ios_agent, actual_mcp_aci_agent], # Correctly passing the resolved agent
             model=llm,
             prompt=prompt_template,
             output_mode="full_history"

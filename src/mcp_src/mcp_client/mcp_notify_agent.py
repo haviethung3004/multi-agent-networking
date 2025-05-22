@@ -6,12 +6,27 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langgraph.prebuilt import create_react_agent
 from contextlib import asynccontextmanager
+from langchain.prompts import PromptTemplate
 
 
 from dotenv import load_dotenv, find_dotenv
 import os
 
 load_dotenv(find_dotenv(), override=True)
+
+
+prompt = """
+    Your task is to send a message to the user by telegram.
+    You can use tool to do it
+    
+    Question:
+
+    {messages}
+    """
+
+prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
+
+
 
 server_params = {
     "url": "http://telegram.api.hungaws.online:8001/mcp",
@@ -34,9 +49,8 @@ async def mcp_notify_agent():
                 tools=tools,
                 model=llm,
                 name="notify-agent",
-                prompt="You are a Notify Agent. Your job is to send the message to the user via MCP Notify Agent."
+                prompt=prompt_template
             )
-
             yield agent
 
 if __name__ == "__main__":
