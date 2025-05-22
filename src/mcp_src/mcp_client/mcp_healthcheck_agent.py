@@ -41,9 +41,8 @@ prompt = """
     Here is the instruction of using the tools:
     1. Always using the tool get_name_devices to get the name of the devices firstly if user doesn't provide the name of the device.
        You can use get_name_devices without any parameters. Testbed file is already set. Don't ask for it
-    2. If user ask for specific checking, please use the appropriate tool.
-    3. Custom tool can be used if for any specific command.
-
+    2. If user ask for specific except cpu, crc, or interface checing, please use custom_show_command tool
+    
     Questions to ask:
     {messages}
 """
