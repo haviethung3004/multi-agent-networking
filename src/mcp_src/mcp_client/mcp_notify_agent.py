@@ -68,4 +68,4 @@ async def mcp_notify_agent():
 
 if __name__ == "__main__":
     # Run the agent
-    asyncio.run(mcp_notify_agent())
+    pass
