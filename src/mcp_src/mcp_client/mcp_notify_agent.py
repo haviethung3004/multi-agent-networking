@@ -3,7 +3,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from src.tools.telegram_tools import connect, get_updates, send_message
 from langchain.prompts import PromptTemplate
+import logging
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 
@@ -31,9 +35,10 @@ prompt = """
 prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
 def notify_agent():
-    app = create_react_agent(model=llm, tools=[connect, send_message, get_updates], prompt=prompt_template, name="notify-agent")
+    app = create_react_agent(model=llm, tools=[send_message], prompt=prompt_template, name="notify-agent")
     return app
 
 
 if __name__ == "__main__":
-    pass
+    app_response = notify_agent()
+    app_response.invoke({"messages": "Hello, this is a test message., Send a message to the user with content: 'Hello, this is a test message.'"})

@@ -50,7 +50,7 @@ llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-
 
 
 
-
+@asynccontextmanager
 async def setup_supervisor_graph():
     """
     Asynchronously initializes the healthcheck agent and creates/compiles the supervisor graph
@@ -63,18 +63,10 @@ async def setup_supervisor_graph():
             model=llm,
             prompt=prompt_template,
             output_mode="full_history",
-            add_handoff_back_messages=True,
-            supervisor_name="networking-supervisor",
-            tools=[
-                create_handoff_tool(agent_name="ios-agent", name="assign_to_mcp-ios-agent", description="Asign task to mcp-ios-agent"),
-                create_handoff_tool(agent_name="aci-agent", name="assign_to_mcp-aci-agent", description="Asign task to mcp-aci-agent"),
-                create_handoff_tool(agent_name="notify-agent", name="assign_to_mcp-notify-agent", description="Asign task to mcp-notify-agent"),
-            ],
-            add_handoff_messages=False,
-            handoff_tool_prefix="delegate_to"
+            supervisor_name="network-supervisor",
         )
         app = supervisor_definition.compile()
-        return app
+        yield app
 
 if __name__ == "__main__":
         pass
