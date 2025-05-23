@@ -1,6 +1,7 @@
 # src/mcp_src/mcp_client/mcp_notify_agent.py
 from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.stdio import StdioServerParameters
+from mcp.client.stdio import stdio_client
 import asyncio
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mcp_adapters.tools import load_mcp_tools
@@ -17,7 +18,11 @@ load_dotenv(find_dotenv(), override=True)
 
 prompt = """
     Your task is to send a message to the user by telegram.
-    Remember that you must use tool a time and wait for the answer.
+    You can use the following tools:
+    1. send_message: Send a message to the user by telegram.
+    2. update_message: Update a message to the user by telegram.
+    3. connect: Checking the connection to the server.
+
     Question:
 
     {messages}
@@ -27,13 +32,14 @@ prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
 
 
-server_params = {
-    "url": "http://telegram.api.hungaws.online:8001/mcp",
-}
-
+server_params = StdioServerParameters(
+    command="/home/dsu979/.local/bin/uv",
+    #Make sure to use the correct path to your uv command
+    args=["--directory", "/home/dsu979/telegram-mcp", "run", "/home/dsu979/telegram-mcp/main.py",]
+)
 # @asynccontextmanager
 async def mcp_notify_agent():
-    async with streamablehttp_client(**server_params) as (read, write, _): #type: ignore
+    async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the MCP client session
             await session.initialize()
@@ -52,7 +58,7 @@ async def mcp_notify_agent():
                 prompt=prompt_template,
             )
 
-            agent_response = await agent.ainvoke({"messages": "Hello, how are you?, Please use get chat tool first"})
+            agent_response = await agent.ainvoke({"messages": "Hello, how are you?"})
             print(agent_response) 
             return agent
             #yield agent

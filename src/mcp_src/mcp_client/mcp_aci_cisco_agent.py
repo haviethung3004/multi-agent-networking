@@ -54,7 +54,7 @@ async def mcp_aci_agent():
             #prompt = await load_mcp_prompt(session)
 
             # Create the agent
-            agent = create_react_agent(model=llm, tools=tools, name="aci_agent", prompt=prompt_template)
+            agent = create_react_agent(model=llm, tools=tools, name="aci-agent", prompt=prompt_template)
             yield agent
 
 if __name__ == "__main__":
