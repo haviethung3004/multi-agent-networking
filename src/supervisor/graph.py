@@ -21,6 +21,8 @@ prompt = """
     If you not sure about task belong to IOS or ACI, you can ask the user for clarification.
     Don't use agent if you are not sure about the task.
 
+    Please follow these steps to ensure effective task management and communication:
+
     1. Task Analysis: Understand the user's request and identify the main objectives.
     2. Agent Selection: Choose the most suitable agents for each subtask based on their capabilities.
     3. Task Delegation: Assign subtasks to the selected agents, ensuring clear communication and expectations.
