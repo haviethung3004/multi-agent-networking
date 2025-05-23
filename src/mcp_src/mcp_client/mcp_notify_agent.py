@@ -17,11 +17,8 @@ load_dotenv(find_dotenv(), override=True)
 
 
 prompt = """
-    Your task is to send a message to the user by telegram.
-    You can use the following tools:
-    1. send_message: Send a message to the user by telegram.
-    2. update_message: Update a message to the user by telegram.
-    3. connect: Checking the connection to the server.
+    You are a notify agent. Your manager will send you a message.
+    Please use apporpriate tool to send the message to the user via telegram.
 
     Question:
 
@@ -37,7 +34,7 @@ server_params = StdioServerParameters(
     #Make sure to use the correct path to your uv command
     args=["--directory", "/home/dsu979/telegram-mcp", "run", "/home/dsu979/telegram-mcp/main.py",]
 )
-# @asynccontextmanager
+@asynccontextmanager
 async def mcp_notify_agent():
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
@@ -46,7 +43,6 @@ async def mcp_notify_agent():
 
             # Load the tools for the agent
             tools = await load_mcp_tools(session)
-            print(tools)
 
             llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model = "gemini-2.0-flash-lite")
 
@@ -58,11 +54,12 @@ async def mcp_notify_agent():
                 prompt=prompt_template,
             )
 
-            agent_response = await agent.ainvoke({"messages": "Hello, how are you?"})
-            print(agent_response) 
-            return agent
-            #yield agent
+            # agent_response = await agent.ainvoke({"messages": "Hello, how are you?"})
+            #print(agent_response) 
+            #return agent
+            yield agent
 
 if __name__ == "__main__":
     # Run the agent
-    asyncio.run(mcp_notify_agent())
+    # asyncio.run(mcp_notify_agent())
+    pass
