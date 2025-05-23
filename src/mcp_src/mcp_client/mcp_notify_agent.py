@@ -34,11 +34,38 @@ prompt = """
 
 prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
-def notify_agent():
-    app = create_react_agent(model=llm, tools=[send_message], prompt=prompt_template, name="notify-agent")
-    return app
 
+
+server_params = {
+    "url": "http://telegram.api.hungaws.online:8001/mcp",
+}
+
+# @asynccontextmanager
+async def mcp_notify_agent():
+    async with streamablehttp_client(**server_params) as (read, write, _): #type: ignore
+        async with ClientSession(read, write) as session:
+            # Initialize the MCP client session
+            await session.initialize()
+
+            # Load the tools for the agent
+            tools = await load_mcp_tools(session)
+            print(tools)
+
+            llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model = "gemini-2.0-flash-lite")
+
+            # Create the agent with the tools
+            agent = create_react_agent(
+                tools=tools,
+                model=llm,
+                name="notify-agent",
+                prompt=prompt_template,
+            )
+
+            agent_response = await agent.ainvoke({"messages": "Hello, how are you?, Please use get chat tool first"})
+            print(agent_response) 
+            return agent
+            #yield agent
 
 if __name__ == "__main__":
-    app_response = notify_agent()
-    app_response.invoke({"messages": "Hello, this is a test message., Send a message to the user with content: 'Hello, this is a test message.'"})
+    # Run the agent
+    asyncio.run(mcp_notify_agent())
