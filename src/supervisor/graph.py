@@ -9,7 +9,7 @@ from mcp_src.mcp_client.mcp_notify_agent import mcp_notify_agent
 from mcp_src.mcp_client.mcp_ios_cisco_agent import mcp_ios_agent
 from mcp_src.mcp_client.mcp_aci_cisco_agent import mcp_aci_agent
 from langchain.prompts import PromptTemplate
-
+from langgraph_supervisor import create_handoff_tool
 
 prompt = """
     You are a highly experienced CCIE (Cisco Certified Internetwork Expert) specializing managing a network team.
@@ -43,7 +43,9 @@ from dotenv import load_dotenv, find_dotenv
 import os
 
 load_dotenv(find_dotenv(), override=True)
-llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.0-flash-lite")
+llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.0-flash-lite", temperature=0.5)
+
+
 
 
 @asynccontextmanager
@@ -53,12 +55,21 @@ async def setup_supervisor_graph():
     using your specific `create_supervisor`.
     Returns the compiled supervisor application.
     """
-    async with mcp_notify_agent() as actual_mcp_notify_agent, mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent:
+    async with mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent, mcp_notify_agent() as acutal_notify_agent:
         supervisor_definition = create_supervisor(
-            agents=[actual_mcp_notify_agent, actual_mcp_ios_agent, actual_mcp_aci_agent], # Correctly passing the resolved agent
+            agents=[acutal_notify_agent, actual_mcp_ios_agent, actual_mcp_aci_agent],
             model=llm,
             prompt=prompt_template,
-            output_mode="full_history"
+            output_mode="full_history",
+            add_handoff_back_messages=True,
+            supervisor_name="networking-supervisor",
+            tools=[
+                create_handoff_tool(agent_name="ios-agent", name="assign_to_mcp-ios-agent", description="Asign task to mcp-ios-agent"),
+                create_handoff_tool(agent_name="aci-agent", name="assign_to_mcp-aci-agent", description="Asign task to mcp-aci-agent"),
+                create_handoff_tool(agent_name="notify-agent", name="assign_to_mcp-notify-agent", description="Asign task to mcp-notify-agent"),
+            ],
+            add_handoff_messages=False,
+            handoff_tool_prefix="delegate_to"
         )
         app = supervisor_definition.compile()
         yield app
