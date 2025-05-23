@@ -46,12 +46,12 @@ async def mcp_notify_agent():
             # Create the agent with the tools
             agent = create_react_agent(
                 tools=tools,
-                interrupt_after=["tools"],
                 model=llm,
                 name="notify-agent",
                 prompt=prompt_template,
                 
             )
+            
             yield agent
 
 if __name__ == "__main__":

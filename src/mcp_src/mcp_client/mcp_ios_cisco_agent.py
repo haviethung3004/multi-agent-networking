@@ -44,7 +44,7 @@ prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 server_params = StdioServerParameters(
     command="/home/dsu979/.local/bin/uv",
     #Make sure to use the correct path to your uv command
-    args=["run","--with", "netmiko", "/home/dsu979/MCP_Network_automator/mcp_cisco_server.py"]
+    args=["--directory", "/home/dsu979/MCP_Network_automator", "run", "/home/dsu979/MCP_Network_automator/mcp_cisco_server.py",]
 )
 
 @asynccontextmanager

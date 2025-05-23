@@ -34,7 +34,7 @@ prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
 server_params = StdioServerParameters(
     command="/home/dsu979/.local/bin/uv",
-    args=["run", "--with-requirements", "/home/dsu979/ACI_MCP/aci_mcp/requirements.txt", "/home/dsu979/ACI_MCP/aci_mcp/main.py"]
+    args=["--directory", "/home/dsu979/ACI_MCP/aci_mcp", "run", "/home/dsu979/ACI_MCP/aci_mcp/main.py",]
 )
 
 @asynccontextmanager
