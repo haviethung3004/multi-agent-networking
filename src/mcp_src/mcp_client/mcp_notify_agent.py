@@ -31,7 +31,7 @@ server_params = {
     "url": "http://telegram.api.hungaws.online:8001/mcp",
 }
 
-@asynccontextmanager
+# @asynccontextmanager
 async def mcp_notify_agent():
     async with streamablehttp_client(**server_params) as (read, write, _): #type: ignore
         async with ClientSession(read, write) as session:
@@ -40,6 +40,7 @@ async def mcp_notify_agent():
 
             # Load the tools for the agent
             tools = await load_mcp_tools(session)
+            print(tools)
 
             llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model = "gemini-2.0-flash-lite")
 
@@ -49,10 +50,13 @@ async def mcp_notify_agent():
                 model=llm,
                 name="notify-agent",
                 prompt=prompt_template,
-                
             )
-            
-            yield agent
+
+            agent_response = await agent.ainvoke({"messages": "Hello, how are you?, Please use get chat tool first"})
+            print(agent_response) 
+            return agent
+            #yield agent
 
 if __name__ == "__main__":
-    pass
+    # Run the agent
+    asyncio.run(mcp_notify_agent())
