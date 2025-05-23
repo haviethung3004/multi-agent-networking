@@ -5,7 +5,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.store.memory import InMemoryStore
 from mcp_src.mcp_client.mcp_healthcheck_agent import mcp_healcheck_agent
 from contextlib import asynccontextmanager
-from mcp_src.mcp_client.mcp_notify_agent import mcp_notify_agent
+from mcp_src.mcp_client.mcp_notify_agent import notify_agent
 from mcp_src.mcp_client.mcp_ios_cisco_agent import mcp_ios_agent
 from mcp_src.mcp_client.mcp_aci_cisco_agent import mcp_aci_agent
 from langchain.prompts import PromptTemplate
@@ -32,6 +32,9 @@ prompt = """
        IOS-agent will know the username and password for the devices.
     7. ACI Agent: If the task involves ACI configuration, use the ACI agent to perform these tasks.
     8. Always sending the final result to the via notify-agent, then it will send to user a message via telegram with the structure of content
+
+    NOTE: Please be careful when ask notify-agent, just send the message, don't say too much ask him to send the message.
+
     Questions from the user:
     
     {messages}
@@ -48,16 +51,15 @@ llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-
 
 
 
-@asynccontextmanager
 async def setup_supervisor_graph():
     """
     Asynchronously initializes the healthcheck agent and creates/compiles the supervisor graph
     using your specific `create_supervisor`.
     Returns the compiled supervisor application.
     """
-    async with mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent, mcp_notify_agent() as acutal_notify_agent:
+    async with mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent:
         supervisor_definition = create_supervisor(
-            agents=[acutal_notify_agent, actual_mcp_ios_agent, actual_mcp_aci_agent],
+            agents=[notify_agent(), actual_mcp_ios_agent, actual_mcp_aci_agent],
             model=llm,
             prompt=prompt_template,
             output_mode="full_history",
@@ -72,7 +74,7 @@ async def setup_supervisor_graph():
             handoff_tool_prefix="delegate_to"
         )
         app = supervisor_definition.compile()
-        yield app
+        return app
 
 if __name__ == "__main__":
         pass

@@ -1,16 +1,11 @@
 # src/mcp_src/mcp_client/mcp_notify_agent.py
-from mcp import ClientSession
-from mcp.client.stdio import StdioServerParameters
-from mcp.client.stdio import stdio_client
-import asyncio
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_mcp_adapters.tools import load_mcp_tools
 from langgraph.prebuilt import create_react_agent
-from langchain_mcp_adapters.resources import load_mcp_resources
-from langchain_mcp_adapters.prompts import load_mcp_prompt
-from contextlib import asynccontextmanager
+from src.tools.telegram_tools import connect, get_updates, send_message
 from langchain.prompts import PromptTemplate
-from typing import TypedDict
+
+
+
 
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -35,39 +30,10 @@ prompt = """
 
 prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
+def notify_agent():
+    app = create_react_agent(model=llm, tools=[connect, send_message, get_updates], prompt=prompt_template, name="notify-agent")
+    return app
 
-
-server_params = StdioServerParameters(
-    command="/home/dsu979/.local/bin/uv",
-    #Make sure to use the correct path to your uv command
-    args=["--directory", "/home/dsu979/telegram-mcp", "run", "/home/dsu979/telegram-mcp/main.py",]
-)
-
-from typing import Annotated
-from langchain.schema import BaseMessage
-from langgraph.graph.message import add_messages
-
-
-@asynccontextmanager
-async def mcp_notify_agent():
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            # Initialize the MCP client session
-            await session.initialize()
-
-            # Load the tools for the agent
-            tools = await load_mcp_tools(session)
-
-            # Load the resources for the agent
-            await load_mcp_resources(session)
-            # Create the agent with the tools
-            agent = create_react_agent(
-                tools=tools,
-                model=llm,
-                name="notify-agent",
-                prompt=prompt_template,
-            )
-            yield agent
 
 if __name__ == "__main__":
     pass
