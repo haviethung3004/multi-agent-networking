@@ -5,7 +5,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.store.memory import InMemoryStore
 from mcp_src.mcp_client.mcp_healthcheck_agent import mcp_healcheck_agent
 from contextlib import asynccontextmanager
-from mcp_src.mcp_client.mcp_notify_agent import notify_agent
+from mcp_src.mcp_client.mcp_notify_agent import mcp_notify_agent
 from mcp_src.mcp_client.mcp_ios_cisco_agent import mcp_ios_agent
 from mcp_src.mcp_client.mcp_aci_cisco_agent import mcp_aci_agent
 from langchain.prompts import PromptTemplate
@@ -57,9 +57,9 @@ async def setup_supervisor_graph():
     using your specific `create_supervisor`.
     Returns the compiled supervisor application.
     """
-    async with mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent:
+    async with mcp_ios_agent() as actual_mcp_ios_agent, mcp_aci_agent() as actual_mcp_aci_agent, mcp_notify_agent() as acutal_notify_agent:
         supervisor_definition = create_supervisor(
-            agents=[notify_agent(), actual_mcp_ios_agent, actual_mcp_aci_agent],
+            agents=[acutal_notify_agent, actual_mcp_ios_agent, actual_mcp_aci_agent],
             model=llm,
             prompt=prompt_template,
             output_mode="full_history",
