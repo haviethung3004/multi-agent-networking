@@ -1,8 +1,10 @@
 # src/mcp_src/mcp_client/mcp_notify_agent.py
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
-from src.tools.telegram_tools import connect, get_updates, send_message
 from langchain.prompts import PromptTemplate
+from mcp.client.stdio import stdio_client, StdioServerParameters
+from mcp.client.session import ClientSession
+from langchain_mcp_adapters.tools import load_mcp_tools
 import logging
 
 # Set up logging
@@ -14,18 +16,15 @@ logger = logging.getLogger(__name__)
 from dotenv import load_dotenv, find_dotenv
 import os
 
+SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN", "")
+SLACK_TEAM_ID = os.getenv("SLACK_TEAM_ID", "")
+
 load_dotenv(find_dotenv(), override=True)
 llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model = "gemini-2.0-flash-lite")
 
 
 prompt = """
-    You have these tools by folowing:
-
-    1. connect: Use this tool to check if the server is running. Always use this tool first.
-    2. message: Use this tool to send a message to the Telegram bot.
-    3. get_updates: Get the latest updates from the Telegram bot to make sure the messages are sent.
-
-    Note: You just use every tool once, and you cannot use the same tool again.
+    You are a highly experienced Slack bot designed to notify users about important events and messages.
 
     Question:
 
@@ -36,13 +35,19 @@ prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
 
 
-server_params = {
-    "url": "http://telegram.api.hungaws.online:8001/mcp",
-}
+server_params = StdioServerParameters(
+    command="npx",
+    args= ["-y","@modelcontextprotocol/server-slack"],
+    env= {
+    "SLACK_BOT_TOKEN": f"{SLACK_BOT_TOKEN}",
+    "SLACK_TEAM_ID": f"{SLACK_TEAM_ID}",
+    }
+
+)
 
 # @asynccontextmanager
 async def mcp_notify_agent():
-    async with streamablehttp_client(**server_params) as (read, write, _): #type: ignore
+    async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the MCP client session
             await session.initialize()
@@ -61,11 +66,12 @@ async def mcp_notify_agent():
                 prompt=prompt_template,
             )
 
-            agent_response = await agent.ainvoke({"messages": "Hello, how are you?, Please use get chat tool first"})
+            agent_response = await agent.ainvoke({"messages": "Hello, how are you?, Please send me a Hello message."})
             print(agent_response) 
             return agent
             #yield agent
 
 if __name__ == "__main__":
     # Run the agent
-    pass
+    import asyncio
+    asyncio.run(mcp_notify_agent())
