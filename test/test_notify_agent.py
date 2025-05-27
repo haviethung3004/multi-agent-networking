@@ -42,8 +42,6 @@ async def test_notify_agent(user_message: str):
         return None
 
 if __name__ == "__main__":
-    test_messages = ["Please send Hello to me"]
-    for message in test_messages:
-        print(f"\nTesting message: {message}")
-        result = asyncio.run(test_notify_agent(message))
-        print(f"Final state: {result}")
+    test_messages = ["Please send How are you to day to me"]
+    result = asyncio.run(test_notify_agent(test_messages[0]))
+    print(test_messages)

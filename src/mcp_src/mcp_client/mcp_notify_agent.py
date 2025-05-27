@@ -43,7 +43,7 @@ server_params = StdioServerParameters(
 )
 
 #@asynccontextmanager
-async def mcp_notify_agent(messages):
+async def mcp_notify_agent(messages) -> str:
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the MCP client session

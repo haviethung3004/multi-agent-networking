@@ -97,7 +97,7 @@ async def notify_agent_node(state: AgentState) -> AgentState:
     """
     try:
         # Get the latest user message
-        user_message = state.get("messages", "No message provided")
+        user_message = state.get("messages", [{}])
         agent_id = state.get("agent_id", "notify_agent")
         logger.info(f"Notify agent processing message: {user_message}")
         result = await mcp_notify_agent(user_message)
