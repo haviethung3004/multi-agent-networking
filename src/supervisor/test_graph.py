@@ -86,6 +86,8 @@ ios_prompt = """
     """
 
 ios_prompt_template = PromptTemplate(template=ios_prompt, input_variables=["messages"])
+
+
 notify_prompt = """
     You are a highly experienced Slack bot designed to notify users about important events and messages.
     Remember that your channel ID is C086HGY8XAN
@@ -138,7 +140,7 @@ async def make_graph():
         model=llm,
         tools=ios_mcp_tools,
         name="ios-agent",
-        prompt=notify_prompt_template
+        prompt=ios_prompt_template
     )
 
     notify_agent = create_react_agent(
@@ -151,7 +153,7 @@ async def make_graph():
     workflow = create_supervisor(
         model=llm,
         agents=[aci_agent,ios_agent,notify_agent],
-        output_mode="full_history",
+        output_mode="last_message",
         supervisor_name="network-supervisor",
         prompt=supervisor_prompt_template)
     
