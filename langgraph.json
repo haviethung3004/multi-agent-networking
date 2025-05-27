@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "graph": "src/supervisor/test_graph.py:make_graph"
+    "graph": "./graph.py:make_graph"
   },
   "env": "./.env"
 }

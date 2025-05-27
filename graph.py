@@ -159,7 +159,6 @@ async def make_graph():
     
     # Compile the workflow
     app = workflow.compile()
-    # Invoke the app with a test message
     return app
 
 if __name__ == "__main__":

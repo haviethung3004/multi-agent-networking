@@ -1,5 +1,0 @@
-hostname,ip,username,password,protocol,os,enable_password
-R1,10.10.20.171,cisco,cisco,ssh,iol,cisco
-R2,10.10.20.172,cisco,cisco,ssh,iol,cisco
-SW1,10.10.20.173,cisco,cisco,ssh,iol,cisco
-SW2,10.10.20.174,cisco,cisco,ssh,iol,cisco
