@@ -42,6 +42,5 @@ async def test_notify_agent(user_message: str):
         return None
 
 if __name__ == "__main__":
-    test_messages = ["Please send How are you to day to me"]
+    test_messages = ["Please send 'Hello' to me"]
     result = asyncio.run(test_notify_agent(test_messages[0]))
-    print(test_messages)

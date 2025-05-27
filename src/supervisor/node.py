@@ -44,7 +44,6 @@ async def supervisor_node(state: AgentState) -> AgentState:
     try:
         # Get the latest user message (type: "human")
         user_message = state.get("messages", [{}])
-        print(user_message)
         responses = state.get("agent_responses", {})
         agent_id = state.get("agent_id", "supervisor")
         logger.info(f"Supervisor processing user message: {user_message}, responses: {responses}")
