@@ -50,7 +50,7 @@ llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-
 
 
 
-@asynccontextmanager
+# @asynccontextmanager
 async def setup_supervisor_graph():
     """
     Asynchronously initializes the healthcheck agent and creates/compiles the supervisor graph
@@ -66,7 +66,13 @@ async def setup_supervisor_graph():
             supervisor_name="network-supervisor",
         )
         app = supervisor_definition.compile()
-        yield app
+        app_response = await app.ainvoke({"messages":"Hello, Can you send me the hello message to my channel?"})
+        print(app_response)
+        return app
+
+
+        #yield app
 
 if __name__ == "__main__":
-        pass
+    import asyncio
+    asyncio.run(setup_supervisor_graph())

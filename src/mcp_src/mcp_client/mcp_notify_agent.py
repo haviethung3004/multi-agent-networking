@@ -7,6 +7,7 @@ from mcp.client.session import ClientSession
 from langchain_mcp_adapters.tools import load_mcp_tools
 import logging
 from contextlib import asynccontextmanager
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ SLACK_TEAM_ID = os.getenv("SLACK_TEAM_ID", "")
 
 prompt = """
     You are a highly experienced Slack bot designed to notify users about important events and messages.
-    You can list the channels you can see and notify users in those channels.
+    Remember that your channel ID is C086HGY8XAN
+
 
     Question:
 
@@ -31,9 +33,6 @@ prompt = """
     """
 
 prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
-
-
-
 server_params = StdioServerParameters(
     command="npx",
     args= ["-y","@modelcontextprotocol/server-slack"],
@@ -41,11 +40,10 @@ server_params = StdioServerParameters(
     "SLACK_BOT_TOKEN": f"{SLACK_BOT_TOKEN}",
     "SLACK_TEAM_ID": f"{SLACK_TEAM_ID}",
     }
-
 )
 
-@asynccontextmanager
-async def mcp_notify_agent():
+#@asynccontextmanager
+async def mcp_notify_agent(messages):
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the MCP client session
@@ -64,13 +62,17 @@ async def mcp_notify_agent():
                 prompt=prompt_template,
             )
 
-            #agent_response = await agent.ainvoke({"messages": "Hello, how are you?, Please list a channel id you can see now and send me a message in response channel."})
-            #print(agent_response) 
-            #return agent
-            yield agent
+            async for chunk in agent.astream({"messages": f"{messages}"}):
+                if isinstance(chunk, dict) and "agent" in chunk and "messages" in chunk["agent"]:
+                    for message in chunk["agent"]["messages"]:
+                        if hasattr(message, "content") and message.content:
+                            logger.info(message.content)
+                            return message.content
+            return "No response"
+            #yield agent
 
 if __name__ == "__main__":
     # Run the agent
-    #import asyncio
-    #asyncio.run(mcp_notify_agent())
-    pass
+    import asyncio
+    asyncio.run(mcp_notify_agent(messages="Hello, Can you send me the hello message to my channel?"))
+    #pass

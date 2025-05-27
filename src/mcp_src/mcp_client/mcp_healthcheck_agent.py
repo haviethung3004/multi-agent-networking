@@ -49,7 +49,6 @@ prompt = """
 
 prompt_template = PromptTemplate(template=prompt, input_variables=["messages"])
 
-
 server_params = StdioServerParameters(
     command="/home/dsu979/.local/bin/uv",
     #Make sure to use the correct path to your uv command
