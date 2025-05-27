@@ -100,10 +100,9 @@ notify_prompt_template = PromptTemplate(template=notify_prompt, input_variables=
 
 
 # Define the LLM
-llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.0-flash-lite", temperature=0.5)
+llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.5-flash-preview-04-17", temperature=0.5)
 
 
-@asynccontextmanager
 async def make_graph():
     client =  MultiServerMCPClient({
     "aci-agent":{
@@ -147,20 +146,21 @@ async def make_graph():
         model=llm,
         tools=notify_mcp_tools,
         name="notify-agent",
-        prompt=notify_prompt_template
+        prompt=notify_prompt_template,
+        version="v2"
     )
 
     workflow = create_supervisor(
         model=llm,
         agents=[aci_agent,ios_agent,notify_agent],
-        output_mode="last_message",
+        output_mode="full_history",
         supervisor_name="network-supervisor",
         prompt=supervisor_prompt_template)
     
     # Compile the workflow
     app = workflow.compile()
     # Invoke the app with a test message
-    yield app
+    return app
 
 if __name__ == "__main__":
     pass
