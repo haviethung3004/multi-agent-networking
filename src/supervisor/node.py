@@ -21,62 +21,61 @@ llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-
 # Prompt for LLM routing
 routing_prompt = PromptTemplate(
     template="""
-    You are a supervisor agent managing three agents: notify_agent, ios_agent, and aci_agent.
-    - notify_agent sends Slack notifications.
-    - ios_agent handles iOS-related tasks.
-    - aci_agent processes ACI-specific tasks.
-    
-    Given the task: "{task}"
+    You are a supervisor agent managing a notify_agent that sends Slack notifications.
+    Given the latest user message: "{user_message}"
     And agent responses: {responses}
     
-    Decide which agent to route to next or if the task is complete.
-    - If an agent has provided a response, consider it to decide the next step.
-    - If the task is complete, return "complete".
-    - Otherwise, choose "notify_agent", "ios_agent", or "aci_agent".
+    Decide the next step:
+    - If the user message indicates a need to send a notification and notify_agent hasn’t responded, return "notify_agent".
+    - If notify_agent has provided a response, return "complete".
+    - If the message is unclear or no action is needed, return "complete".
     
-    Return only the agent name or "complete".
+    Return only "notify_agent" or "complete".
     """,
-    input_variables=["task", "responses"]
+    input_variables=["user_message", "responses"]
 )
 
 
 # Supervisor agent node
 async def supervisor_node(state: AgentState) -> AgentState:
     """
-    Supervisor node that manages the state of the supervisor agent,
-    delegating tasks to notify_agent, ios_agent, or aci_agent.
+    Supervisor node that uses an LLM to interpret user messages from the messages list and end the workflow.
     """
     try:
-        task = state.get("task", "No task provided")
+        # Get the latest user message (type: "human")
+        user_message = state.get("messages", [{}])
+        print(user_message)
         responses = state.get("agent_responses", {})
-        logger.info(f"Supervisor processing task: {task} with responses: {responses}")
-        # Create a new message to log supervisor activity
-        new_message = {
-            "type": "system",  # Changed to "type" for LangGraph convention
-            "content": f"Processing task: {state['task']}",
-            "agent_id": state["agent_id"]
-        }
+        agent_id = state.get("agent_id", "supervisor")
+        logger.info(f"Supervisor processing user message: {user_message}, responses: {responses}")
 
-        #Use llm to device the next agent
+        new_message = {
+            "type": "system",
+            "content": f"Processing user message: {user_message}, responses: {responses}",
+            "agent_id": agent_id
+        }
+        # Use LLM to decide next action
         responses_str = "\n".join([f"{agent}: {resp}" for agent, resp in responses.items()]) # type: ignore
-        prompt_input = {"task": task, "responses": responses_str or "None"}
-        next_agent = (await llm.ainvoke(routing_prompt.format(**prompt_input))).content.strip() # type: ignore
+        prompt_input = {"user_message": user_message, "responses": responses_str or "None"}
+        next_action = (await llm.ainvoke(routing_prompt.format(**prompt_input))).content.strip() # type: ignore
 
         # Update state
-        if next_agent == "complete":
-            logger.info("Task is complete, share final output to user")
-            final_output = responses_str or "Task completed"
+        if next_action == "complete":
+            final_output = responses_str if responses_str else "No actions taken for message"
+            new_message["content"] += " - Message processing complete."
+            logger.info("Supervisor ending workflow")
             return {
                 "messages": [new_message],
                 "current_agent": None,
                 "agent_id": "supervisor",
                 "final_output": final_output
-            } # type: ignore
-        else: 
-            logger.info(f"Routing task to next agent: {next_agent}")
+            }  # type: ignore
+        else:
+            new_message["content"] += f" - Delegating to {next_action}."
+            logger.info(f"Supervisor delegating to: {next_action}")
             return {
                 "messages": [new_message],
-                "current_agent": next_agent,
+                "current_agent": next_action,
                 "agent_id": "supervisor"
             } # type: ignore
     except Exception as e:
@@ -90,41 +89,34 @@ async def supervisor_node(state: AgentState) -> AgentState:
             "current_agent": None,
             "agent_id": "supervisor",
             "final_output": f"Error: {str(e)}"
-        }# type: ignore
-    
+        }     # type: ignore
 
 async def notify_agent_node(state: AgentState) -> AgentState:
     """
-    Notify agent node that sends notifications to users.
-    This node is responsible for sending messages to users via the notify agent.
+    Notify agent node that sends notifications based on the latest user message.
     """
     try:
-        # Extract the task from state
-        task = state.get("task", "No task provided")
-        logger.info(f"Notify agent processing task: {task}")
-
-        #Call the mcp_notify_agent to send the message
-        result = await mcp_notify_agent(task)
+        # Get the latest user message
+        user_message = state.get("messages", "No message provided")
+        agent_id = state.get("agent_id", "notify_agent")
+        logger.info(f"Notify agent processing message: {user_message}")
+        result = await mcp_notify_agent(user_message)
         logger.info(f"Notify agent result: {result}")
-
-        # Create a new message to log notify agent activity
         new_message = {
-            "type": "assistant",  # Changed to "type" for LangGraph convention
-            "content": f"Notify agent processed task: {task}",
-            "agent_id": state["agent_id"]
+            "type": "system",
+            "content": f"Notify agent processed message: {user_message}, result: {result}",
+            "agent_id": agent_id
         }
-
-        #Update state
         return {
             "agent_responses": {**state.get("agent_responses", {}), "notify_agent": result}, # type: ignore
             "messages": [new_message],
             "current_agent": None,
             "agent_id": "notify_agent"
-        } # type: ignore
+        }
     except Exception as e:
         logger.error(f"Notify agent error: {e}")
         error_message = {
-            "type": "error",
+            "type": "system",
             "content": f"Notify agent failed: {str(e)}",
             "agent_id": "notify_agent"
         }
@@ -134,4 +126,4 @@ async def notify_agent_node(state: AgentState) -> AgentState:
             "current_agent": None,
             "agent_id": "notify_agent",
             "final_output": f"Error: {str(e)}"
-        } # type: ignore
+        }

@@ -5,11 +5,9 @@ from langgraph.graph import StateGraph, END
 import asyncio
 import logging
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Define the workflow
 workflow = StateGraph(AgentState)
 workflow.add_node("supervisor", supervisor_node)
 workflow.add_node("notify_agent", notify_agent_node)
@@ -21,17 +19,18 @@ workflow.add_conditional_edges(
         END: END
     }
 )
+
 workflow.add_edge("notify_agent", "supervisor")
 workflow.set_entry_point("supervisor")
+
 graph = workflow.compile()
 
-async def test_notify_agent(task: str):
+async def test_notify_agent(user_message: str):
     initial_state = AgentState(
-        task=task,
         agent_responses={},
         current_agent=None,
         final_output=None,
-        messages=[],
+        messages=[{"type": "human", "content": user_message}],
         agent_id="supervisor"
     )
     try:
@@ -43,8 +42,8 @@ async def test_notify_agent(task: str):
         return None
 
 if __name__ == "__main__":
-    test_tasks = ["Send a notification: Hello"]
-    for task in test_tasks:
-        print(f"\nTesting task: {task}")
-        result = asyncio.run(test_notify_agent(task))
+    test_messages = ["Please send Hello to me"]
+    for message in test_messages:
+        print(f"\nTesting message: {message}")
+        result = asyncio.run(test_notify_agent(message))
         print(f"Final state: {result}")
