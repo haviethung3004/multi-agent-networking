@@ -33,10 +33,7 @@ supervisor_prompt = """
     6. Change or check configuration: If the task involves network configuration or checking, use the IOS agent to perform these tasks.
        IOS-agent will know the username and password for the devices.
     7. ACI Agent: If the task involves ACI configuration, use the ACI agent to perform these tasks.
-    8. Always sending the final result to the via notify-agent, then it will send to user a message via telegram with the structure of content
-
-    NOTE: Please be careful when ask notify-agent, just send the message, don't say too much ask him to send the message.
-
+    8. Always sending the final result to the via notify-agent, then it will send to user a message via slack with the structure of content
     Questions from the user:
     
     {messages}
@@ -89,7 +86,6 @@ ios_prompt = """
     """
 
 ios_prompt_template = PromptTemplate(template=ios_prompt, input_variables=["messages"])
-
 notify_prompt = """
     You are a highly experienced Slack bot designed to notify users about important events and messages.
     Remember that your channel ID is C086HGY8XAN
@@ -98,7 +94,6 @@ notify_prompt = """
     """
 
 notify_prompt_template = PromptTemplate(template=notify_prompt, input_variables=["messages"])
-
 ###################### END OF PROMPTS ######################
 
 
@@ -109,27 +104,25 @@ llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-
 @asynccontextmanager
 async def make_graph():
     client =  MultiServerMCPClient({
-        "aci-agent":{
-            "command": "/home/dsu979/.local/bin/uv",
-            "args" : ["--directory", "/home/dsu979/ACI_MCP/aci_mcp", "run", "/home/dsu979/ACI_MCP/aci_mcp/main.py",],
-            "transport": "stdio"
+    "aci-agent":{
+        "command": "/home/dsu979/.local/bin/uv",
+        "args" : ["--directory", "/home/dsu979/ACI_MCP/aci_mcp", "run", "/home/dsu979/ACI_MCP/aci_mcp/main.py",],
+        "transport": "stdio"
+    },
+    "ios-agent":{
+        "command": "/home/dsu979/.local/bin/uv",
+        "args" : ["--directory", "/home/dsu979/MCP_Network_automator", "run", "/home/dsu979/MCP_Network_automator/mcp_cisco_server.py"],
+        "transport": "stdio"
+    },
+    "notify-agent":{
+        "command": "npx",
+        "args" : ["-y","@modelcontextprotocol/server-slack"],
+        "env": {
+            "SLACK_BOT_TOKEN": os.getenv("SLACK_BOT_TOKEN", ""),
+            "SLACK_TEAM_ID": os.getenv("SLACK_TEAM_ID", "")
         },
-        "ios-agent":{
-            "command": "/home/dsu979/.local/bin/uv",
-            "args" : ["--directory", "/home/dsu979/MCP_Network_automator", "run", "/home/dsu979/MCP_Network_automator/mcp_cisco_server.py"],
-            "transport": "stdio"
-        },
-        "notify-agent":{
-            "command": "npx",
-            "args" : ["-y","@modelcontextprotocol/server-slack"],
-            "env": {
-                "SLACK_BOT_TOKEN": os.getenv("SLACK_BOT_TOKEN", ""),
-                "SLACK_TEAM_ID": os.getenv("SLACK_TEAM_ID", "")
-            },
-            "transport": "stdio"
-        }}) # type: ignore
-        #async with client.session(server_name="aci-agent") as aci_session, client.session(server_name="ios-agent") as aci_session, client.session(server_name="notify-agent") as ios_session, client.session(server_name="notify-agent") as notify_session:
-        # Get the mcp tools
+        "transport": "stdio"
+    }}) # type: ignore
     aci_mcp_tools = await client.get_tools(server_name="aci-agent")
     ios_mcp_tools = await client.get_tools(server_name="ios-agent")
     notify_mcp_tools = await client.get_tools(server_name="notify-agent")
