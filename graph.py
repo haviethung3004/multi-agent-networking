@@ -42,9 +42,6 @@ supervisor_prompt = """
 
 supervisor_prompt_template = PromptTemplate(template=supervisor_prompt, input_variables=["messages"])
 
-
-
-
 aci_prompt = """
     You are a highly experienced CCIE (Cisco Certified Internetwork Expert) with extensive expertise in designing, configuring, and managing complex network Datacenter infrastructures.
     Your task will check and configure on ACI. Your configure should be valid and executable.
@@ -87,7 +84,6 @@ ios_prompt = """
 
 ios_prompt_template = PromptTemplate(template=ios_prompt, input_variables=["messages"])
 
-
 notify_prompt = """
     You are a highly experienced Slack bot designed to notify users about important events and messages.
     Remember that your channel ID is C086HGY8XAN
@@ -99,7 +95,7 @@ notify_prompt_template = PromptTemplate(template=notify_prompt, input_variables=
 ###################### END OF PROMPTS ######################
 
 
-# Define the LLM
+# Define the LLM for google generative AI
 llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.5-flash-preview-04-17", temperature=0.5)
 
 
