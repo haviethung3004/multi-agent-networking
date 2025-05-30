@@ -20,7 +20,7 @@ supervisor_prompt = """
     delegate tasks to appropriate agents (including those handling networking-related functions), 
     manage network communication between agents, ensure fault tolerance, and synthesize results into a cohesive output.
     When user ask you somthing, must understand the task and delegate the task to the appropriate agents.
-    If you not sure about task belong to IOS or ACI, you can ask the user for clarification.
+    If you not sure about task belong to IOS, you can ask the user for clarification.
     Don't use agent if you are not sure about the task.
 
     Please follow these steps to ensure effective task management and communication:
@@ -32,8 +32,7 @@ supervisor_prompt = """
     5. Transparency and Reporting: Provide the user with a clear overview of the task progress, including any challenges faced and how they were resolved.
     6. Change or check configuration: If the task involves network configuration or checking, use the IOS agent to perform these tasks.
        IOS-agent will know the username and password for the devices.
-    7. ACI Agent: If the task involves ACI configuration, use the ACI agent to perform these tasks.
-    8. Always sending the final result to the via notify-agent, then it will send to user a message via slack with the structure of content
+    7. Always sending the final result to the via notify-agent, then it will send to user a message via slack with the structure of content
     Questions from the user:
     
     {messages}
@@ -60,21 +59,25 @@ aci_prompt_template = PromptTemplate(template=aci_prompt, input_variables=["mess
 
 ios_prompt = """
     You are a highly experienced CCIE (Cisco Certified Internetwork Expert) with extensive expertise in designing, configuring, and managing complex network infrastructures.
-    Your task will check and configure on Cisco IOS devices. Your configure should be valid and executable.
+    Your task will mainly check and configure on Cisco IOS devices. Your configure should be valid and executable.
     The Network Configuration Agent must achieve the following objectives:
     1. Configuration Validation: Check Cisco IOS device configurations for errors, inconsistencies, or deviations from best practices.
     2. Automated Configuration: Apply valid, executable Cisco IOS configurations based on predefined policies or dynamic requirements.
     3. Thinking Process: Clearly articulate your thought process and reasoning behind each configuration decision.
     4. Result Reporting: Provide a detailed report of the configuration changes made, including before-and-after comparisons.
     
+    NOTE: You must not configure if you are not sure about the task. Don't remove any configuration if you are not sure about the task.
+    Please send the message to the user via notify-agent, then it will send to user a message via slack with the structure of content.
+
     Some information about the network:
     Credentials: cisco / cisco
     Protocol: ssh
 
-    | R1         | IOL XE    | 10.10.20.171 |
-    | R2         | IOL XE    | 10.10.20.172 |
-    | SW1        | IOL L2 XE | 10.10.20.173 |
-    | SW2        | IOL L2 XE | 10.10.20.174 |
+    mgmt IPs of the devices:
+    mgmt vrf: MGMT
+    | CSR1         | IOS XE    | 192.168.1.55 |
+    | CSR2         | IOS XE    | 192.168.1.59 |
+    | CSR3         | IOS XE    | 192.168.1.50 |
 
     
     Questions to ask:
@@ -96,7 +99,7 @@ notify_prompt_template = PromptTemplate(template=notify_prompt, input_variables=
 
 
 # Define the LLM for google generative AI
-llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.5-flash-preview-04-17", temperature=0.5)
+llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"), model="gemini-2.5-flash-preview-05-20", temperature=0.5)
 
 
 async def make_graph():
@@ -120,16 +123,16 @@ async def make_graph():
         },
         "transport": "stdio"
     }}) # type: ignore
-    aci_mcp_tools = await client.get_tools(server_name="aci-agent")
+    #aci_mcp_tools = await client.get_tools(server_name="aci-agent")
     ios_mcp_tools = await client.get_tools(server_name="ios-agent")
     notify_mcp_tools = await client.get_tools(server_name="notify-agent")
 
-    aci_agent = create_react_agent(
-        model=llm,
-        tools=aci_mcp_tools,
-        name="aci-agent",
-        prompt=aci_prompt_template
-    )
+    # aci_agent = create_react_agent(
+    #     model=llm,
+    #     tools=aci_mcp_tools,
+    #     name="aci-agent",
+    #     prompt=aci_prompt_template
+    # )
 
     ios_agent = create_react_agent(
         model=llm,
@@ -148,7 +151,7 @@ async def make_graph():
 
     workflow = create_supervisor(
         model=llm,
-        agents=[aci_agent,ios_agent,notify_agent],
+        agents=[ios_agent,notify_agent],
         output_mode="full_history",
         supervisor_name="network-supervisor",
         prompt=supervisor_prompt_template)
